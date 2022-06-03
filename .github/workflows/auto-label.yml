@@ -1,0 +1,58 @@
+# Automatically labels a PR based on number of files changed
+# NOTE: only labels on OPEN, would have to remove labels on other events
+# Requires the labels that you apply to be passed in since it depends on the repo
+
+name: Auto label PR size
+
+on:
+  pull_request_target:
+    types:
+      - opened
+  workflow_call:
+    inputs:
+      small_label:
+        required: true
+        type: string
+      medium_label:
+        required: true
+        type: string
+      large_label:
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  repository-projects: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - uses: actions/checkout@v3
+
+      # D a set of commands using the runners shell
+      - name: Label based on files changed
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          small_label="${{ inputs.small_label }}"
+          medium_label="${{ inputs.medium_label }}"
+          large_label="${{ inputs.large_label }}"
+          echo small_label, medium_label, large_label
+          PR_NUMBER=$(echo $GITHUB_REF | awk 'BEGIN { FS = "/" } ; { print $3 }')
+          echo PR# $PR_NUMBER changed
+          CHANGED_FILES=`gh pr view $PR_NUMBER --json changedFiles | jq '.changedFiles'`
+          echo $CHANGED_FILES changed
+
+          if [ $CHANGED_FILES -ge 11 ] && [ $CHANGED_FILES -le 49 ]
+          then
+            gh pr edit $PR_NUMBER --add-label "$large_label"
+          elif [ $CHANGED_FILES -ge 50 ]
+          then
+            gh pr edit $PR_NUMBER --add-label "$medium_label"
+          else [ $CHANGED_FILES -le 10 ]
+            gh pr edit $PR_NUMBER --add-label "$small_label"
+          fi
