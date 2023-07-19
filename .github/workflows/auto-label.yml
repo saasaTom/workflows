@@ -37,6 +37,7 @@ jobs:
       - name: Label based on files changed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           small_label="${{ inputs.small_label }}"
           medium_label="${{ inputs.medium_label }}"
