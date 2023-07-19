@@ -37,6 +37,7 @@ jobs:
       - name: Label based on files changed
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
         run: |
           small_label="${{ inputs.small_label }}"
           medium_label="${{ inputs.medium_label }}"
@@ -49,10 +50,10 @@ jobs:
 
           if [ $CHANGED_FILES -ge 11 ] && [ $CHANGED_FILES -le 49 ]
           then
-            gh pr edit $PR_NUMBER --add-label "$large_label"
+            gh pr edit $PR_NUMBER --add-label "$medium_label"
           elif [ $CHANGED_FILES -ge 50 ]
           then
-            gh pr edit $PR_NUMBER --add-label "$medium_label"
+            gh pr edit $PR_NUMBER --add-label "$large_label"
           else [ $CHANGED_FILES -le 10 ]
             gh pr edit $PR_NUMBER --add-label "$small_label"
           fi
